@@ -12,8 +12,36 @@ export async function GET(req) {
     }
 
     try {
+        const parsed = new URL(url);
+
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+            return NextResponse.json({ error: "Invalid URL protocol" }, { status: 400 });
+        }
+
+        const hostname = parsed.hostname.toLowerCase();
+        const privatePatterns = [
+            /^localhost$/,
+            /^127\./,
+            /^10\./,
+            /^172\.(1[6-9]|2\d|3[01])\./,
+            /^192\.168\./,
+            /^::1$/,
+            /^fc00:/,
+            /^fe80:/,
+            /^0\./,
+            /^169\.254\./,
+        ];
+        if (privatePatterns.some(p => p.test(hostname))) {
+            return NextResponse.json({ error: "Private URLs are not allowed" }, { status: 400 });
+        }
+    } catch {
+        return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+    }
+
+    try {
         const response = await fetch(url, {
             headers: { "User-Agent": "Mozilla/5.0" },
+            signal: AbortSignal.timeout(5000),
         });
 
         if (!response.ok) {
@@ -25,7 +53,7 @@ export async function GET(req) {
 
         return NextResponse.json(metadata, { status: 200 });
     } catch (error) {
-        return NextResponse.json({ error: "Internal server error", details: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
 
