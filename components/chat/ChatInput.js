@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
 import { handleEmojiShortcodes } from "../../utils/emojiUtils";
 import EmojiPicker from "./EmojiPicker";
 import ImagePreviewModal from "./ImagePreviewModal";
@@ -92,7 +93,7 @@ const ChatInput = ({
     if (file) {
       const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB — TODO: fetch from backend
       if (file.size > MAX_IMAGE_SIZE) {
-        alert('Image is too large (max 10MB)');
+        toast.error('Image is too large (max 10MB)');
         e.target.value = '';
         return;
       }

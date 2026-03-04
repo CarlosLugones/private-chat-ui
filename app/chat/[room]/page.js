@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
 import { useWebSocket } from "../../../hooks/useWebSocket";
 import ChatMessage from "../../../components/chat/ChatMessage";
 import ChatInput from "../../../components/chat/ChatInput";
@@ -156,7 +157,7 @@ export default function ChatRoom() {
   const processImageFile = (file) => {
     if (file && file.type.startsWith('image/')) {
       if (file.size > MAX_IMAGE_SIZE) {
-        alert('Image is too large (max 10MB)');
+        toast.error('Image is too large (max 10MB)');
         return false;
       }
       const reader = new FileReader();
@@ -210,7 +211,7 @@ export default function ChatRoom() {
       
       if (file.type.startsWith('image/')) {
         if (file.size > MAX_IMAGE_SIZE) {
-          alert('Image is too large (max 10MB)');
+          toast.error('Image is too large (max 10MB)');
           return;
         }
         const reader = new FileReader();
