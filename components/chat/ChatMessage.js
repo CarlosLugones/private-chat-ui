@@ -12,12 +12,14 @@ import { getAvatarUrl } from "../../utils/avatarUtils";
  * @param {boolean} props.isLastFromUser - Whether this message is the latest from the user in sequence
  * @param {boolean} props.isTimeBreak - Whether this message starts a new thread after a time gap
  */
+const YOUTUBE_REGEX = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?/
+const WEB_IMAGE_REGEX = /^(https?:\/\/.*\.(?:jpg|gif|avif))(?:\?.*)?$/i
+
 const ChatMessage = ({ message, isCurrentUser, isConnectedToPrevious, isLastFromUser, isTimeBreak }) => {
   const { system, username, content, timestamp, type, imageData, caption } = message;
-  
-  const youtubeCheckRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?/
-  const isImageFromTheWeb = /^(https?:\/\/.*\.(?:jpg|gif|avif))(?:\?.*)?$/i.test(content)
-  const isYoutubeVideo  = youtubeCheckRegex.test(content)
+
+  const isImageFromTheWeb = WEB_IMAGE_REGEX.test(content)
+  const isYoutubeVideo  = YOUTUBE_REGEX.test(content)
   
   // Determine if this is an image message
   const isImageMessage = type === "IMAGE_MESSAGE" || isImageFromTheWeb;
