@@ -26,19 +26,29 @@ export default function Home() {
       return;
     }
     
-    if (username.length > 15) {
-      setError("Username must be 15 characters or less");
+    if (username.length > 20) {
+      setError("Username must be 20 characters or less");
       return;
     }
-    
-    if (!/^[a-zA-Z0-9]+$/.test(username)) {
-      setError("Username can only contain letters and numbers (no spaces or special characters)");
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      setError("Username can only contain letters, numbers, underscores and hyphens");
       return;
     }
-    
+
     // Room name validation
     if (!roomname.trim()) {
       setError("Room name cannot be empty");
+      return;
+    }
+
+    if (roomname.length > 20) {
+      setError("Room name must be 20 characters or less");
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(roomname)) {
+      setError("Room name can only contain letters, numbers, underscores and hyphens");
       return;
     }
     
@@ -82,6 +92,7 @@ export default function Home() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter your name"
+                    maxLength={20}
                     className="block p-2 border border-gray-500 rounded-l w-full focus:outline-none"
                     required
                   />
@@ -105,6 +116,7 @@ export default function Home() {
                     value={roomname}
                     onChange={(e) => setRoomname(e.target.value)}
                     placeholder="Enter room name"
+                    maxLength={20}
                     className="block p-2 border border-gray-500 rounded-l w-full focus:outline-none"
                     required
                   />
