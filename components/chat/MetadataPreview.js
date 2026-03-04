@@ -12,7 +12,7 @@ export default function MetadataPreview({url}) {
         setLoading(true);
 
         try {
-            const response = await fetch(`/api/metadata?url=${encodeURIComponent(url)}`);
+            const response = await fetch(`/api/metadata?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(8000) });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
 
