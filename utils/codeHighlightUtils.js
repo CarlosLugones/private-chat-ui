@@ -89,102 +89,63 @@ export function getSafeLanguage(language) {
   return 'javascript';
 }
 
-/**
- * Escapes HTML in a string to prevent XSS
- * @param {string} str - String to escape
- * @returns {string} - HTML escaped string
- */
-function escapeHTML(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+// Token type definitions for syntax highlighting
+const TOKEN_TYPES = [
+  { type: 'comment', pattern: /\/\/.*?(?=\n|$)|\/\*[\s\S]*?\*\/|#.*?(?=\n|$)/g },
+  { type: 'string', pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/g },
+  { type: 'keyword', pattern: /\b(if|else|for|while|function|return|var|let|const|class|import|export|from|extends|try|catch|finally)\b/g },
+  { type: 'number', pattern: /\b\d+(\.\d+)?\b/g },
+  { type: 'function', pattern: /\b\w+(?=\s*\()/g },
+  { type: 'special', pattern: /[{}[\]()]/g }
+];
 
 /**
- * Alternative fallback syntax highlighter that doesn't rely on Prism's language definitions
- * @param {string} code - The code to highlight
- * @param {string} language - The language
- * @returns {string} - HTML with basic syntax highlighting 
+ * Tokenizes code into an array of {text, type} objects for React rendering.
+ * Returns plain text tokens (no HTML escaping needed — React handles that).
+ * @param {string} code
+ * @returns {{ text: string, type: string | null }[]}
  */
-function fallbackHighlight(code, language) {
-  // Escape HTML first
-  const escapedCode = escapeHTML(code);
-  
-  // Create an array of tokens with their types
+export function tokenizeCode(code) {
   const tokens = [];
-  let currentCode = escapedCode;
-  
-  // Define token types and their patterns
-  const tokenTypes = [
-    { type: 'comment', pattern: /\/\/.*?(?=\n|$)|\/\*[\s\S]*?\*\/|#.*?(?=\n|$)/g },
-    { type: 'string', pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/g },
-    { type: 'keyword', pattern: /\b(if|else|for|while|function|return|var|let|const|class|import|export|from|extends|try|catch|finally)\b/g },
-    { type: 'number', pattern: /\b\d+(\.\d+)?\b/g },
-    { type: 'function', pattern: /\b\w+(?=\s*\()/g },
-    { type: 'special', pattern: /[\{\}\[\]\(\)]/g }
-  ];
-
-  // Process the code to identify tokens
-  let processedText = '';
   let lastIndex = 0;
-  
-  // Function to find the earliest match across all patterns
-  function findNextToken(text, startIndex) {
-    let earliestMatch = null;
-    let matchType = null;
-    
-    for (const { type, pattern } of tokenTypes) {
+
+  function findNextToken(startIndex) {
+    let earliest = null;
+    let earliestType = null;
+    for (const { type, pattern } of TOKEN_TYPES) {
       pattern.lastIndex = startIndex;
-      const match = pattern.exec(text);
-      if (match && (!earliestMatch || match.index < earliestMatch.index)) {
-        earliestMatch = match;
-        matchType = type;
+      const match = pattern.exec(code);
+      if (match && (!earliest || match.index < earliest.index)) {
+        earliest = match;
+        earliestType = type;
       }
     }
-    
-    return { match: earliestMatch, type: matchType };
+    return { match: earliest, type: earliestType };
   }
-  
-  // Process the text to find tokens
-  while (lastIndex < escapedCode.length) {
-    const { match, type } = findNextToken(escapedCode, lastIndex);
-    
+
+  while (lastIndex < code.length) {
+    const { match, type } = findNextToken(lastIndex);
     if (match) {
-      // Add any text before this token
       if (match.index > lastIndex) {
-        processedText += escapedCode.substring(lastIndex, match.index);
+        tokens.push({ text: code.substring(lastIndex, match.index), type: null });
       }
-      
-      // Add the token with highlighting
-      processedText += `<span class="token ${type}">${match[0]}</span>`;
+      tokens.push({ text: match[0], type });
       lastIndex = match.index + match[0].length;
     } else {
-      // No more tokens found, add the rest of the text
-      processedText += escapedCode.substring(lastIndex);
+      tokens.push({ text: code.substring(lastIndex), type: null });
       break;
     }
   }
-  
-  return processedText || escapedCode;
+
+  return tokens;
 }
 
 /**
- * Simple syntax highlighting for code
- * @param {string} code - The code to highlight
- * @param {string} language - The language to use
- * @returns {string} HTML with syntax highlighting
+ * @deprecated Use tokenizeCode() + React rendering instead.
+ * Kept for backwards compatibility only.
  */
-export function highlightCode(code, language = 'javascript') {
-  try {
-    // First try simplified direct fallback highlighting, which is safer
-    return fallbackHighlight(code, language);
-  } catch (error) {
-    console.error('Error in highlightCode:', error);
-    return escapeHTML(code); // Fallback to plain text
-  }
+export function highlightCode(code) {
+  return code;
 }
 
 /**
