@@ -145,7 +145,9 @@ export default function ChatRoom() {
         }
       }
     },
-    onError: () => {}
+    onError: (error) => {
+      console.error("WebSocket error:", error);
+    }
   });
 
   // Add effect to join the room when connected
