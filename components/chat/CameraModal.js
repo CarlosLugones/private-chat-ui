@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 
 const CameraModal = ({ isOpen, onClose, onCapture }) => {
   const videoRef = useRef(null);
@@ -86,7 +87,7 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
       setActiveCameraId(deviceId);
     } catch (err) {
       console.error('Error switching camera:', err);
-      setPermissionError(`Could not switch camera: ${err.message}`);
+      toast.error(`Could not switch camera: ${err.message}`);
     }
   };
   
@@ -210,7 +211,7 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
         handleClose();
       } catch (err) {
         console.error('Error capturing photo:', err);
-        setPermissionError('Failed to capture photo. Please try again.');
+        toast.error('Failed to capture photo. Please try again.');
         setIsCapturing(false);
       }
     }, 200); // Small delay for visual feedback
