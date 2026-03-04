@@ -85,7 +85,7 @@ export default function FormattedMessage({
   });
   
   // Define regular expressions for patterns to highlight
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]{1,2048})/g;
   const roomRegex = /(#\w+)/g;
   const usernameRegex = /(@\w+)/g;
   
