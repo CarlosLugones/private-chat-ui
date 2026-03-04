@@ -38,8 +38,8 @@ export default function ChatRoom() {
   const [droppedImage, setDroppedImage] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesAreaRef = useRef(null);
-  // Add a ref to track recently left users with timestamps
   const recentlyLeftRef = useRef({});
+  const wasConnectedRef = useRef(false);
   const router = useRouter();
   
   // Load username from localStorage once on mount
@@ -130,11 +130,18 @@ export default function ChatRoom() {
       }
     },
     onConnectionChange: (status) => {
-      console.log("WebSocket connection status changed:", status);
+      if (status) {
+        if (wasConnectedRef.current) {
+          toast.success('Reconnected', { id: 'ws-connection' });
+        }
+        wasConnectedRef.current = true;
+      } else {
+        if (wasConnectedRef.current) {
+          toast.error('Connection lost. Reconnecting...', { id: 'ws-connection' });
+        }
+      }
     },
-    onError: (error) => {
-      // Handle errors
-    }
+    onError: () => {}
   });
 
   // Add effect to join the room when connected
