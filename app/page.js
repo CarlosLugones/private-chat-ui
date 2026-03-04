@@ -9,7 +9,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const router = useRouter();
   const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'localhost:8000';
-  const version = require('../package.json').version;
+  const version = process.env.NEXT_PUBLIC_APP_VERSION;
 
   const handleSubmit = (e) => {
     e.preventDefault();

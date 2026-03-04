@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { version } = require('./package.json');
 
 const csp = [
   "default-src 'self'",
@@ -19,6 +22,9 @@ const csp = [
 ].join('; ');
 
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: version,
+  },
   async headers() {
     return [
       {
