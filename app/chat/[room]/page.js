@@ -40,6 +40,7 @@ export default function ChatRoom() {
   const messagesAreaRef = useRef(null);
   const recentlyLeftRef = useRef({});
   const wasConnectedRef = useRef(false);
+  const hasSentJoinRef = useRef(false);
   const router = useRouter();
   
   // Load username from localStorage once on mount
@@ -146,7 +147,8 @@ export default function ChatRoom() {
 
   // Add effect to join the room when connected
   useEffect(() => {
-    if (connected && username && room) {
+    if (connected && username && room && !hasSentJoinRef.current) {
+      hasSentJoinRef.current = true;
       console.log("Sending JOIN_ROOM message for room:", room);
       sendWebSocketMessage({
         system: true,
@@ -154,6 +156,8 @@ export default function ChatRoom() {
         username: username,
         roomId: room
       });
+    } else if (!connected) {
+      hasSentJoinRef.current = false;
     }
   }, [connected, username, room, sendWebSocketMessage]);
 
