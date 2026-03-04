@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { getAvatarUrl } from "../../utils/avatarUtils";
 import toast from "react-hot-toast";
 import { handleEmojiShortcodes } from "../../utils/emojiUtils";
 import EmojiPicker from "./EmojiPicker";
@@ -404,7 +405,7 @@ const ChatInput = ({
                     onClick={() => handleSelectMention(user)}
                   >
                     <img 
-                      src={`https://avatar.vercel.sh/${user}`} 
+                      src={getAvatarUrl(user)}
                       alt={`${user}'s avatar`} 
                       className="w-5 h-5 rounded-full mr-2" 
                     />

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useWebSocket } from "../../../hooks/useWebSocket";
+import { getAvatarUrl } from "../../../utils/avatarUtils";
 import ChatMessage from "../../../components/chat/ChatMessage";
 import ChatInput from "../../../components/chat/ChatInput";
 import UsernameModal from "../../../components/chat/UsernameModal";
@@ -440,7 +441,7 @@ export default function ChatRoom() {
                           key={user}
                           className={`p-2 rounded-md ${user === username ? 'bg-primary/10 font-medium' : 'bg-base-200'}`}
                         >
-                          <img src={`https://avatar.vercel.sh/${user}`} alt={`${user}'s avatar`} className="w-6 h-6 rounded-full inline-block mr-2" />
+                          <img src={getAvatarUrl(user)} alt={`${user}'s avatar`} className="w-6 h-6 rounded-full inline-block mr-2" />
                           {user === username ? `${user} (you)` : user}
                         </li>
                       ))

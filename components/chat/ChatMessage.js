@@ -1,5 +1,6 @@
 import React from "react";
 import FormattedMessage from "./FormattedMessage";
+import { getAvatarUrl } from "../../utils/avatarUtils";
 
 /**
  * ChatMessage - Component for rendering a single chat message
@@ -56,7 +57,7 @@ const ChatMessage = ({ message, isCurrentUser, isConnectedToPrevious, isLastFrom
       {!system && (isLastFromUser || isTimeBreak) && (
         <div className="chat-image avatar">
           <div className="w-8 rounded-full">
-            <img src={`https://avatar.vercel.sh/${username}`} alt={`${username}'s avatar`} />
+            <img src={getAvatarUrl(username)} alt={`${username}'s avatar`} />
           </div>
         </div>
       )}
