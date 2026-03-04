@@ -119,7 +119,10 @@ export default function ChatRoom() {
       
       // Standard message rendering for messages we want to display
       if (RENDERABLE_TYPES.includes(data.type)) {
-        setMessages(prev => [...prev, data]);
+        setMessages(prev => {
+          const next = [...prev, data];
+          return next.length > 500 ? next.slice(-500) : next;
+        });
       }
       
       switch (data.type) {
