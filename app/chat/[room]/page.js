@@ -34,7 +34,6 @@ export default function ChatRoom() {
   const [showUserList, setShowUserList] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
-  const [pastedImage, setPastedImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [droppedImage, setDroppedImage] = useState(null);
   const messagesEndRef = useRef(null);
@@ -164,28 +163,6 @@ export default function ChatRoom() {
     }
   }, [connected, username, room, sendWebSocketMessage]);
 
-  // TODO: make this dynamic by fetching the limit from the backend
-  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-
-  // Process image file from any source (paste, file input, or drop)
-  const processImageFile = (file) => {
-    if (file && file.type.startsWith('image/')) {
-      if (file.size > MAX_IMAGE_SIZE) {
-        toast.error('Image is too large (max 10MB)');
-        return false;
-      }
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        setPastedImage(event.target.result);
-      };
-      
-      reader.readAsDataURL(file);
-      return true;
-    }
-    return false;
-  };
-
   // Handle drag events for file dropping
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -211,12 +188,15 @@ export default function ChatRoom() {
     }
   };
 
+  // TODO: make this dynamic by fetching the limit from the backend
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
   // Handle drop event - process the dropped file
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       // Process the first file only
@@ -495,8 +475,6 @@ export default function ChatRoom() {
               sendMessage={handleSendMessage}
               isConnected={connected}
               users={users}
-              pastedImage={pastedImage}
-              setPastedImage={setPastedImage}
               droppedImage={droppedImage}
               onImageSend={handleImageData}
             />
