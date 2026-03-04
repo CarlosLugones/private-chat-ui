@@ -86,8 +86,6 @@ export default function ChatRoom() {
     username,
     enabled: ready && !!username && !!room,
     onMessage: (data) => {
-      console.log("Received message:", data);
-      
       // Special handling for system messages about users joining/leaving
       if (data.system === true) {
         if (data.type === "JOIN_ROOM") {
@@ -154,7 +152,6 @@ export default function ChatRoom() {
   useEffect(() => {
     if (connected && username && room && !hasSentJoinRef.current) {
       hasSentJoinRef.current = true;
-      console.log("Sending JOIN_ROOM message for room:", room);
       sendWebSocketMessage({
         system: true,
         type: "JOIN_ROOM",
@@ -223,8 +220,6 @@ export default function ChatRoom() {
     if (files && files.length > 0) {
       // Process the first file only
       const file = files[0];
-      console.log("File dropped:", file.name, file.type);
-      
       if (file.type.startsWith('image/')) {
         if (file.size > MAX_IMAGE_SIZE) {
           toast.error('Image is too large (max 10MB)');
@@ -232,7 +227,6 @@ export default function ChatRoom() {
         }
         const reader = new FileReader();
         reader.onload = (event) => {
-          console.log("Image loaded from drop");
           setDroppedImage(event.target.result);
         };
         reader.readAsDataURL(file);
@@ -264,8 +258,6 @@ export default function ChatRoom() {
     
     // If custom data is provided (e.g., image message), send that instead
     if (customData && connected) {
-      console.log('Sending custom message data:', customData.type);
-      
       // For other types, preserve the original approach
       const fullMessage = {
         ...customData,

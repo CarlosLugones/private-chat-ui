@@ -104,7 +104,6 @@ const ChatInput = ({
         if (file.type.startsWith('image/')) {
           setPastedImage(event.target.result);
         } else {
-          console.log('Unsupported file type:', file.type);
           // Could add a toast notification here
         }
       };
@@ -294,7 +293,6 @@ const ChatInput = ({
   // Detect when droppedImage changes and set it as pastedImage
   useEffect(() => {
     if (droppedImage) {
-      console.log('Received dropped image, opening preview modal');
       setPastedImage(droppedImage);
     }
   }, [droppedImage]);

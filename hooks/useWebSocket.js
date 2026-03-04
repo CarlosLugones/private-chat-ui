@@ -20,7 +20,6 @@ export function useWebSocket({ room, username, enabled, onMessage, onConnectionC
     }
     
     if (ws.current) {
-      console.log('Closing WebSocket connection');
       ws.current.onclose = null; // Remove onclose handler to prevent reconnection attempt
       ws.current.close();
       ws.current = null;
@@ -75,8 +74,6 @@ export function useWebSocket({ room, username, enabled, onMessage, onConnectionC
     if (!enabled || connectingRef.current || ws.current || permanentlyFailed || reconnectingRef.current) return;
     
     connectingRef.current = true;
-    console.log(`Initializing WebSocket connection (attempt ${reconnectAttempts.current + 1})`);
-    
     const backendUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'localhost:8000';
 
     let socket;
@@ -87,7 +84,6 @@ export function useWebSocket({ room, username, enabled, onMessage, onConnectionC
     }
     
     socket.onopen = () => {
-      console.log('WebSocket connected');
       setConnected(true);
       onConnectionChange?.(true);
       reconnectAttempts.current = 0;
@@ -111,8 +107,7 @@ export function useWebSocket({ room, username, enabled, onMessage, onConnectionC
       // We'll let onclose handle the reconnection to avoid duplicate attempts
     };
     
-    socket.onclose = (event) => {
-      console.log('WebSocket disconnected:', event.code, event.reason);
+    socket.onclose = () => {
       setConnected(false);
       onConnectionChange?.(false);
       connectingRef.current = false;
