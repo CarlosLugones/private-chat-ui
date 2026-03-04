@@ -149,9 +149,16 @@ export default function ChatRoom() {
     }
   }, [connected, username, room, sendWebSocketMessage]);
 
+  // TODO: make this dynamic by fetching the limit from the backend
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
   // Process image file from any source (paste, file input, or drop)
   const processImageFile = (file) => {
     if (file && file.type.startsWith('image/')) {
+      if (file.size > MAX_IMAGE_SIZE) {
+        alert('Image is too large (max 10MB)');
+        return false;
+      }
       const reader = new FileReader();
       
       reader.onload = (event) => {
@@ -202,6 +209,10 @@ export default function ChatRoom() {
       console.log("File dropped:", file.name, file.type);
       
       if (file.type.startsWith('image/')) {
+        if (file.size > MAX_IMAGE_SIZE) {
+          alert('Image is too large (max 10MB)');
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (event) => {
           console.log("Image loaded from drop");

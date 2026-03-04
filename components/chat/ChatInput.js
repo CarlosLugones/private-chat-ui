@@ -90,6 +90,12 @@ const ChatInput = ({
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB — TODO: fetch from backend
+      if (file.size > MAX_IMAGE_SIZE) {
+        alert('Image is too large (max 10MB)');
+        e.target.value = '';
+        return;
+      }
       const reader = new FileReader();
       
       reader.onload = (event) => {
