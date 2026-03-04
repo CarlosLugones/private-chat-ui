@@ -13,6 +13,7 @@ export default function MetadataPreview({url}) {
 
         try {
             const response = await fetch(`/api/metadata?url=${encodeURIComponent(url)}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
 
             if (data.error) throw new Error(data.error);
