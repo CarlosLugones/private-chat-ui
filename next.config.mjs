@@ -22,6 +22,11 @@ const csp = [
 ].join('; ');
 
 const nextConfig = {
+  images: {
+    remotePatterns: [
+      { hostname: 'avatars.githubusercontent.com' },
+    ],
+  },
   env: {
     NEXT_PUBLIC_APP_VERSION: version,
   },
