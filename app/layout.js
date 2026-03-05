@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const inter = Inter({ subsets: ['latin'] });
 
-const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL;
+const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
 const coverImageUrl = frontendUrl + '/opengraph-image.png';
 
 export const metadata = {
