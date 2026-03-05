@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 
 const CameraModal = ({ isOpen, onClose, onCapture }) => {
   const videoRef = useRef(null);
@@ -86,7 +87,7 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
       setActiveCameraId(deviceId);
     } catch (err) {
       console.error('Error switching camera:', err);
-      setPermissionError(`Could not switch camera: ${err.message}`);
+      toast.error(`Could not switch camera: ${err.message}`);
     }
   };
   
@@ -106,27 +107,22 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
         audio: false // No need for audio since we removed video
       };
       
-      console.log('Requesting camera access...');
       // Request access to user's camera
       const mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      console.log('Camera access granted');
       
       // Get available cameras for switching
       await getAvailableCameras();
       
       // Set the stream to the video element if it exists
       if (videoRef.current) {
-        console.log('Setting video source');
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         
         // Set up event handlers
         videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded');
           if (videoRef.current) {
             videoRef.current.play()
               .then(() => {
-                console.log('Video playing');
                 setIsCameraReady(true);
               })
               .catch(err => {
@@ -184,15 +180,13 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
         // Set canvas dimensions to match the video
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        console.log(`Canvas dimensions set to ${canvas.width}x${canvas.height}`);
-        
+
         // Draw the current video frame to the canvas
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
         // Convert canvas to data URL
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
-        console.log('Photo captured successfully');
-        
+
         // Pass image data to parent component
         if (onCapture) {
           // Create message object directly for image
@@ -210,7 +204,7 @@ const CameraModal = ({ isOpen, onClose, onCapture }) => {
         handleClose();
       } catch (err) {
         console.error('Error capturing photo:', err);
-        setPermissionError('Failed to capture photo. Please try again.');
+        toast.error('Failed to capture photo. Please try again.');
         setIsCapturing(false);
       }
     }, 200); // Small delay for visual feedback

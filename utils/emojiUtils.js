@@ -82,8 +82,6 @@ const buildEmojiMap = () => {
   try {
     // Process all emojis from emoji-mart data
     if (data && data.emojis) {
-      console.log('Processing emoji data...');
-      
       // Try different ways to access emoji data depending on how it's structured
       Object.entries(data.emojis).forEach(([key, emoji]) => {
         let shortcodes = [];

@@ -1,5 +1,6 @@
 import React from "react";
 import { parseEmojis } from "../../utils/emojiUtils";
+import { getAvatarUrl } from "../../utils/avatarUtils";
 
 const MessageDisplay = ({ message }) => {
   const { text, username, timestamp } = message;
@@ -9,7 +10,7 @@ const MessageDisplay = ({ message }) => {
     <div className="message-container">
       <div className="flex items-start mb-4">
         <img 
-          src={`https://avatar.vercel.sh/${username}`} 
+          src={getAvatarUrl(username)}
           alt={`${username}'s avatar`} 
           className="w-8 h-8 rounded-full mr-2" 
         />

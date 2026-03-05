@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { getAvatarUrl } from "../../utils/avatarUtils";
+import toast from "react-hot-toast";
 import { handleEmojiShortcodes } from "../../utils/emojiUtils";
 import EmojiPicker from "./EmojiPicker";
 import ImagePreviewModal from "./ImagePreviewModal";
@@ -90,6 +92,12 @@ const ChatInput = ({
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB — TODO: fetch from backend
+      if (file.size > MAX_IMAGE_SIZE) {
+        toast.error('Image is too large (max 10MB)');
+        e.target.value = '';
+        return;
+      }
       const reader = new FileReader();
       
       reader.onload = (event) => {
@@ -97,7 +105,6 @@ const ChatInput = ({
         if (file.type.startsWith('image/')) {
           setPastedImage(event.target.result);
         } else {
-          console.log('Unsupported file type:', file.type);
           // Could add a toast notification here
         }
       };
@@ -287,7 +294,6 @@ const ChatInput = ({
   // Detect when droppedImage changes and set it as pastedImage
   useEffect(() => {
     if (droppedImage) {
-      console.log('Received dropped image, opening preview modal');
       setPastedImage(droppedImage);
     }
   }, [droppedImage]);
@@ -399,7 +405,7 @@ const ChatInput = ({
                     onClick={() => handleSelectMention(user)}
                   >
                     <img 
-                      src={`https://avatar.vercel.sh/${user}`} 
+                      src={getAvatarUrl(user)}
                       alt={`${user}'s avatar`} 
                       className="w-5 h-5 rounded-full mr-2" 
                     />

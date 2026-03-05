@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
 import { useWebSocket } from "../../../hooks/useWebSocket";
+import { getAvatarUrl } from "../../../utils/avatarUtils";
 import ChatMessage from "../../../components/chat/ChatMessage";
 import ChatInput from "../../../components/chat/ChatInput";
 import UsernameModal from "../../../components/chat/UsernameModal";
@@ -32,13 +34,13 @@ export default function ChatRoom() {
   const [showUserList, setShowUserList] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
-  const [pastedImage, setPastedImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [droppedImage, setDroppedImage] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesAreaRef = useRef(null);
-  // Add a ref to track recently left users with timestamps
   const recentlyLeftRef = useRef({});
+  const wasConnectedRef = useRef(false);
+  const hasSentJoinRef = useRef(false);
   const router = useRouter();
   
   // Load username from localStorage once on mount
@@ -84,8 +86,6 @@ export default function ChatRoom() {
     username,
     enabled: ready && !!username && !!room,
     onMessage: (data) => {
-      console.log("Received message:", data);
-      
       // Special handling for system messages about users joining/leaving
       if (data.system === true) {
         if (data.type === "JOIN_ROOM") {
@@ -117,7 +117,10 @@ export default function ChatRoom() {
       
       // Standard message rendering for messages we want to display
       if (RENDERABLE_TYPES.includes(data.type)) {
-        setMessages(prev => [...prev, data]);
+        setMessages(prev => {
+          const next = [...prev, data];
+          return next.length > 500 ? next.slice(-500) : next;
+        });
       }
       
       switch (data.type) {
@@ -129,40 +132,36 @@ export default function ChatRoom() {
       }
     },
     onConnectionChange: (status) => {
-      console.log("WebSocket connection status changed:", status);
+      if (status) {
+        if (wasConnectedRef.current) {
+          toast.success('Reconnected', { id: 'ws-connection' });
+        }
+        wasConnectedRef.current = true;
+      } else {
+        if (wasConnectedRef.current) {
+          toast.error('Connection lost. Reconnecting...', { id: 'ws-connection' });
+        }
+      }
     },
     onError: (error) => {
-      // Handle errors
+      console.error("WebSocket error:", error);
     }
   });
 
   // Add effect to join the room when connected
   useEffect(() => {
-    if (connected && username && room) {
-      console.log("Sending JOIN_ROOM message for room:", room);
+    if (connected && username && room && !hasSentJoinRef.current) {
+      hasSentJoinRef.current = true;
       sendWebSocketMessage({
         system: true,
         type: "JOIN_ROOM",
         username: username,
         roomId: room
       });
+    } else if (!connected) {
+      hasSentJoinRef.current = false;
     }
   }, [connected, username, room, sendWebSocketMessage]);
-
-  // Process image file from any source (paste, file input, or drop)
-  const processImageFile = (file) => {
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        setPastedImage(event.target.result);
-      };
-      
-      reader.readAsDataURL(file);
-      return true;
-    }
-    return false;
-  };
 
   // Handle drag events for file dropping
   const handleDragEnter = (e) => {
@@ -189,22 +188,26 @@ export default function ChatRoom() {
     }
   };
 
+  // TODO: make this dynamic by fetching the limit from the backend
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
   // Handle drop event - process the dropped file
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       // Process the first file only
       const file = files[0];
-      console.log("File dropped:", file.name, file.type);
-      
       if (file.type.startsWith('image/')) {
+        if (file.size > MAX_IMAGE_SIZE) {
+          toast.error('Image is too large (max 10MB)');
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (event) => {
-          console.log("Image loaded from drop");
           setDroppedImage(event.target.result);
         };
         reader.readAsDataURL(file);
@@ -236,8 +239,6 @@ export default function ChatRoom() {
     
     // If custom data is provided (e.g., image message), send that instead
     if (customData && connected) {
-      console.log('Sending custom message data:', customData.type);
-      
       // For other types, preserve the original approach
       const fullMessage = {
         ...customData,
@@ -420,7 +421,7 @@ export default function ChatRoom() {
                           key={user}
                           className={`p-2 rounded-md ${user === username ? 'bg-primary/10 font-medium' : 'bg-base-200'}`}
                         >
-                          <img src={`https://avatar.vercel.sh/${user}`} alt={`${user}'s avatar`} className="w-6 h-6 rounded-full inline-block mr-2" />
+                          <img src={getAvatarUrl(user)} alt={`${user}'s avatar`} className="w-6 h-6 rounded-full inline-block mr-2" />
                           {user === username ? `${user} (you)` : user}
                         </li>
                       ))
@@ -474,8 +475,6 @@ export default function ChatRoom() {
               sendMessage={handleSendMessage}
               isConnected={connected}
               users={users}
-              pastedImage={pastedImage}
-              setPastedImage={setPastedImage}
               droppedImage={droppedImage}
               onImageSend={handleImageData}
             />

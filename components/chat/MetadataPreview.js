@@ -12,7 +12,8 @@ export default function MetadataPreview({url}) {
         setLoading(true);
 
         try {
-            const response = await fetch(`/api/metadata?url=${encodeURIComponent(url)}`);
+            const response = await fetch(`/api/metadata?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(8000) });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
 
             if (data.error) throw new Error(data.error);
@@ -49,6 +50,10 @@ export default function MetadataPreview({url}) {
 
     if (!metadata) return null;
 
+    const isSafeUrl = (u) => {
+        try { return /^https?:$/i.test(new URL(u).protocol); } catch { return false; }
+    };
+
     return (
         <a 
             href={metadata.url || url} 
@@ -57,11 +62,11 @@ export default function MetadataPreview({url}) {
             className="block my-3 max-w-xl mx-auto no-underline hover:no-underline"
         >
             <div className="flex flex-col overflow-hidden border border-gray-700 rounded-lg bg-gray-800/30 hover:bg-gray-800/60 transition-colors duration-200">
-                {metadata.image && (
+                {metadata.image && isSafeUrl(metadata.image) && (
                     <div className="w-full h-40 overflow-hidden bg-black">
-                        <img 
-                            src={metadata.image} 
-                            alt={metadata.title || "Link preview"} 
+                        <img
+                            src={metadata.image}
+                            alt={metadata.title || "Link preview"}
                             className="w-full h-full object-cover"
                             onError={(e) => e.target.style.display = 'none'}
                         />
@@ -69,10 +74,10 @@ export default function MetadataPreview({url}) {
                 )}
                 <div className="p-3">
                     <div className="flex items-center mb-1">
-                        {metadata.favicon && (
-                            <img 
-                                src={metadata.favicon} 
-                                alt="" 
+                        {metadata.favicon && isSafeUrl(metadata.favicon) && (
+                            <img
+                                src={metadata.favicon}
+                                alt=""
                                 className="w-4 h-4 mr-2"
                                 onError={(e) => e.target.style.display = 'none'}
                             />

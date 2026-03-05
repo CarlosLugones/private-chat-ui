@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-import { detectLanguage, highlightCode, copyCodeToClipboard, getSafeLanguage } from '../../utils/codeHighlightUtils';
+import { detectLanguage, tokenizeCode, copyCodeToClipboard, getSafeLanguage } from '../../utils/codeHighlightUtils';
 import ImageMessage from './ImageMessage';
 import VideoPlayer from './VideoPlayer';
 import MetadataPreview from './MetadataPreview';
@@ -85,7 +85,7 @@ export default function FormattedMessage({
   });
   
   // Define regular expressions for patterns to highlight
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]{1,2048})/g;
   const roomRegex = /(#\w+)/g;
   const usernameRegex = /(@\w+)/g;
   
@@ -256,30 +256,16 @@ export default function FormattedMessage({
 
       case 'codeblock': {
         const { code, language } = codeBlocks[match.id];
-        
-        // Get highlighted code with extra safety
-        let highlightedCode;
-        try {
-          highlightedCode = highlightCode(code, language);
-        } catch (error) {
-          console.error('Fallback to plain text due to error:', error);
-          // Basic HTML escape as ultimate fallback
-          highlightedCode = code
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-        }
-        
+        const tokens = tokenizeCode(code);
+
         result.push(
-          <div 
+          <div
             key={`match-${idx}`}
             className="relative my-2 w-full overflow-hidden"
           >
             <div className="flex justify-between items-center bg-gray-800 px-2 py-1 text-xs font-mono rounded-t border-t border-l border-r border-gray-700">
               <span className="text-green-400">{language}</span>
-              <button 
+              <button
                 className="text-gray-400 hover:text-white px-2"
                 onClick={() => handleCopyCode(code, match.id, 'block')}
               >
@@ -287,10 +273,13 @@ export default function FormattedMessage({
               </button>
             </div>
             <pre className="bg-gray-900 p-3 overflow-x-auto rounded-b border-l border-r border-b border-gray-700">
-              <code 
-                className={`language-${language}`}
-                dangerouslySetInnerHTML={{ __html: highlightedCode }}
-              />
+              <code className={`language-${language}`}>
+                {tokens.map((token, i) =>
+                  token.type
+                    ? <span key={i} className={`token ${token.type}`}>{token.text}</span>
+                    : token.text
+                )}
+              </code>
             </pre>
           </div>
         );

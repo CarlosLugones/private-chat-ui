@@ -17,13 +17,13 @@ export default function UsernameModal({ isOpen, onSubmit }) {
       return;
     }
     
-    if (username.length > 15) {
-      setError('Username must be 15 characters or less');
+    if (username.length > 20) {
+      setError('Username must be 20 characters or less');
       return;
     }
-    
-    if (!/^[a-zA-Z0-9]+$/.test(username)) {
-      setError('Username can only contain letters and numbers (no spaces or special characters)');
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      setError('Username can only contain letters, numbers, underscores and hyphens');
       return;
     }
     
