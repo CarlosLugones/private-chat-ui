@@ -1,6 +1,5 @@
-'use client';
-
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function About() {
   return (
@@ -36,7 +35,7 @@ export default function About() {
                       </p>
                   </blockquote>
                   <figcaption className="flex items-center justify-center mt-2 gap-2">
-                      <img className="w-5 h-5 rounded-full" src="https://avatars.githubusercontent.com/u/18733370?v=4" alt="Carlos Lugones" />
+                      <Image className="rounded-full" src="https://avatars.githubusercontent.com/u/18733370?v=4" alt="Carlos Lugones" width={20} height={20} />
                       <cite className="font-medium text-base-content/70">
                         Carlos Lugones
                       </cite>
